@@ -12,20 +12,18 @@ loaded_tracks, wav_files = load_conversion()
 # Now you can use loaded_tracks and wav_files
 
 
-def detect_beats(audio_file):
+def detect_beats(audio_file,sr):
     # Load the audio file
-    audio = madmom.audio.signal.Signal(audio_file)
+    audio = madmom.audio.signal.Signal(audio_file, sample_rate=sr)
 
     # Create a beat tracking processor
-    processor = madmom.features.beats.RNNBeatProcessor()
+    act = madmom.features.beats.RNNBeatProcessor()(audio_file)
 
-    # Process the audio and get the detected beats
-    beats = processor(audio)
+    # Detect beats
+    beats = madmom.features.beats.BeatTrackingProcessor(fps=100)(act)
 
-    return beats
+    return np.array(beats)
 
-
-### Downbeat
 
 def detect_downbeats(audio_file, fps=100):
     # Get the beat and downbeat activations
@@ -43,10 +41,7 @@ def detect_downbeats(audio_file, fps=100):
     return np.array(downbeats)
 
 
-def estimate_tempo_from_downbeats(audio_file):
-    # Detect the downbeats
-    downbeats = detect_downbeats(audio_file, fps=100)
-
+def estimate_tempo_from_downbeats(audio_file, downbeats):
     # Calculate the time difference between consecutive downbeats
     downbeat_differences = np.diff(downbeats[:, 0])
 
@@ -59,10 +54,8 @@ def estimate_tempo_from_downbeats(audio_file):
     # Calculate the tempo: 60 seconds divided by the average difference
     # Since downbeat_differences are in seconds, this gives beats per minute
     tempo = 4 * (60 / mod_diff)
-    print(downbeat_differences)
-    print(tempo)
 
-    return tempo, mod_diff
+    return tempo, mod_diff, downbeat_differences
 
 
 def calculate_bpm_change(bpm_track1, bpm_track2):
@@ -73,7 +66,6 @@ def calculate_bpm_change(bpm_track1, bpm_track2):
     return change
 
 
-### NEWWWWWWWWW
 def calculate_rms_transitions_indices(audio, sr, downbeats, window_size=1024, hop_length=512):
     # Calculate RMS
     rms = librosa.feature.rms(y=audio, frame_length=window_size, hop_length=hop_length).squeeze()
@@ -105,7 +97,6 @@ def calculate_rms_transitions_indices(audio, sr, downbeats, window_size=1024, ho
     return top_rms_indices, rms_transitions
 
 
-### NEWEST
 def filter_consecutive_indices(indices, rms_transitions, consecutive_index_distance=3):
     # If there are 4 or less indices, return them all
     if len(indices) <= 4:
@@ -165,13 +156,3 @@ def preprocessing(wav_file):
     cue_points = get_cue_points_from_filtered_indices(filtered_indices, downbeats)
 
     return transitions_indices, filtered_indices, cue_points
-
-
-if __name__ == "__main__":
-    # This is a test block that you can use to verify your functions.
-    # You would need to replace 'test.wav' with the actual path to a .wav file on your system.
-    test_file = 'test.wav'
-    transitions_indices, filtered_indices, cue_points = preprocessing(test_file)
-    print(f"Transitions indices: {transitions_indices}")
-    print(f"Filtered indices: {filtered_indices}")
-    print(f"Cue points: {cue_points}")
