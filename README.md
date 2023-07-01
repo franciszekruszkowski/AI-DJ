@@ -14,6 +14,10 @@ Our Python script can load audio files, convert them from MP3 to WAV format, and
 
 At this stage, the audio files are analyzed to detect beats and downbeats, estimate the tempo, calculate the Root Mean Square (RMS) transitions, filter out closely located indices, and determine the cue points for transitions.
 
+### Track Analysis and Visualisations
+
+We have created a `track.py` class for handling track analysis tasks, such as BPM detection and beat grid placement. It also provides functions to generate visualisations of the audio data, which can be helpful for debugging and verification of the analysis results.
+
 ### Mixing
 
 We have begun the process of developing functions for mixing two tracks. Currently, transitions between tracks are accomplished through a basic crossfading technique, and the Beats Per Minute (BPM) of the second track is adjusted to match the first track. This approach provides a good starting point, although the transitions may not be perfectly aligned at all times.
