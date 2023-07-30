@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_waveform(audio, sr):
@@ -15,39 +16,21 @@ def plot_waveform(audio, sr):
     plt.show()
 
 
-def plot_waveform_with_downbeats(audio, sr, downbeats):
-    # Compute the time values for the waveform
-    times = np.linspace(0, len(audio) / sr, len(audio))
+def plot_waveform_with_hot_cues(audio, sr, hot_cues):
+    # Create a time array for the waveform
+    duration = len(audio) / sr
+    times = np.linspace(0, duration, len(audio))
 
-    # Create a figure
+    # Create the plot
     plt.figure(figsize=(14, 5))
     plt.plot(times, audio, alpha=0.6)
 
-    # Plot the detected downbeats as vertical lines
-    for downbeat in downbeats:
-        plt.axvline(x=downbeat[0], color='r')
+    # Plot the hot cues as vertical lines
+    for hot_cue in hot_cues:
+        plt.axvline(x=hot_cue, color='r')
 
     plt.ylim(-1, 1)
     plt.xlabel('Time (s)')
     plt.ylabel('Amplitude')
-    plt.title('Waveform with Detected Downbeats')
-    plt.show()
-
-
-def plot_waveform_with_cue_points(audio, sr, cue_points):
-    # Compute the time values for the waveform
-    times = np.linspace(0, len(audio) / sr, len(audio))
-
-    # Create a figure
-    plt.figure(figsize=(14, 5))
-    plt.plot(times, audio, alpha=0.6)
-
-    # Plot the cue points as vertical lines
-    for cue_point in cue_points:
-        plt.axvline(x=cue_point, color='g')
-
-    plt.ylim(-1, 1)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.title('Waveform with Detected Cue Points')
+    plt.title('Waveform with Hot Cues')
     plt.show()

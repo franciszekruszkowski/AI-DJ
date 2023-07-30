@@ -18,9 +18,17 @@ At this stage, the audio files are analyzed to detect beats and downbeats, estim
 
 We have created a `track.py` class for handling track analysis tasks, such as BPM detection and beat grid placement. It also provides functions to generate visualisations of the audio data, which can be helpful for debugging and verification of the analysis results.
 
+### Tempo Adjustment and Mixing
+
+We have developed the functionality to adjust the tempo of tracks to match each other, allowing for smooth transitions. The transitions between tracks are accomplished through a basic crossfading technique.
+
+### Equalization (EQ)
+
+The EQ adjustment is implemented to control the Low, Mid, and High frequencies of the tracks during transition. This allows us to cut out the bass (Lows) for specific time frames (4, 8, or 16 bars), emulating a common DJing technique.
+
 ### Mixing
 
-We have begun the process of developing functions for mixing two tracks. Currently, transitions between tracks are accomplished through a basic crossfading technique, and the Beats Per Minute (BPM) of the second track is adjusted to match the first track. This approach provides a good starting point, although the transitions may not be perfectly aligned at all times.
+Successful mixing between two tracks, including beatmatching with correctly adjusted BPMs and EQ adjustments, has been implemented. A simple crossfade function is also in place for smooth transitions.
 
 ## What's Next? Project Roadmap
 
@@ -28,15 +36,7 @@ The following steps have been outlined to further develop and refine the AI-DJ p
 
 ### Improve the Sync Function
 
-We plan to enhance the function that adjusts the BPM of the second track to match the first. This will include syncing downbeats, beats, and the grid to achieve a smoother blend between two tracks.
-
-### Add EQ Features
-
-We aim to add Equalizer (EQ) features that allow for control of the Low, Mid, and High frequencies of the tracks. This will enable us to cut out the bass (Lows) for specific time frames (4, 8, or 16 bars), emulating a common DJing technique.
-
-### Create and Train a Machine Learning Model
-
-Our goal is to build and train an Artificial Neural Network (ANN) that will understand how a transition is made. The ANN will be trained using examples of how EQ knobs were manipulated in several mixes, seeking patterns in EQ changes and patterns of musical phrases in two tracks where transitions occur.
+This will include syncing downbeats, beats, and the grid to achieve a smoother blend between two tracks. We aim to improve the function so that it detects the optimal bars in beats more effectively and self-corrects if minor adjustments are necessary.
 
 ### Add Randomness
 

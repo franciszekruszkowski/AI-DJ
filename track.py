@@ -1,20 +1,26 @@
-import os
 import librosa
-from file_load_conversion import *
-from preprocessing import detect_downbeats, estimate_tempo_from_downbeats, calculate_rms_transitions_indices, \
-    filter_consecutive_indices, get_cue_points_from_filtered_indices, detect_beats
+from preprocessing import (
+    calculate_beats_multifeature,
+    detect_downbeats,
+    estimate_tempo_from_downbeats,
+    calculate_rms_transitions_indices,
+    filter_consecutive_indices,
+    get_cue_points_from_filtered_indices
+)
 
 
 class Track:
-    def __init__(self, wav_file):
+    def __init__(self, name, wav_file):
+        self.name = name
         self.wav_file = wav_file
-        self.audio, self.sr = librosa.load(wav_file)
+        self.audio, self.sr = librosa.load(wav_file, sr=44100)
         self.tempo = None
         self.downbeats = None
-        self.cue_points = None
+        self.cue_points_rms = None
         self.beats = None
-        self.filtered_indices = None
+        self.filtered_indices_rms = None
         self.downbeat_differences = None
+        self.cue_point_counts = None
 
     def detect_downbeats(self):
         self.downbeats = detect_downbeats(self.wav_file)
@@ -22,37 +28,34 @@ class Track:
     def estimate_tempo_from_downbeats(self):
         self.tempo, _, self.downbeat_differences = estimate_tempo_from_downbeats(self.wav_file, self.downbeats)
 
+    def calculate_beats_multifeature(self):
+        self.beats = calculate_beats_multifeature(self.wav_file)
+
     def calculate_rms_transition_cue_points(self):
-        top_rms_indices, rms_transitions = calculate_rms_transitions_indices(self.audio, self.sr, self.downbeats)
-        self.filtered_indices = filter_consecutive_indices(top_rms_indices, rms_transitions)
-        self.cue_points = get_cue_points_from_filtered_indices(self.filtered_indices, self.downbeats)
+        top_rms_indices, rms_transitions = calculate_rms_transitions_indices(self.audio, self.sr, self.beats)
+        self.filtered_indices_rms = filter_consecutive_indices(top_rms_indices, rms_transitions)
+        self.cue_points_rms = get_cue_points_from_filtered_indices(self.filtered_indices_rms, self.beats)
 
-    def detect_beats(self):
-        self.beats = detect_beats(self.wav_file, self.sr)
+    def count_cue_points_in_all_beat_series(self):
+        counts = [0, 0, 0, 0]
+        # Increment the count for the appropriate series for each index
+        for index in self.filtered_indices_rms:
+            series_number = index % 4
+            counts[series_number] += 1
+        self.cue_point_counts = counts
 
 
-# Instantiate the Track class for each WAV file
-tracks = {}
-
-for wav_file in wav_files:
-    # Extract the base name of the file without extension
-    track_name = os.path.splitext(os.path.basename(wav_file))[0]
-
-    # Create an instance of Track
-    track = Track(wav_file)
-
-    # Store the Track instance in the dictionary
-    tracks[track_name] = track
-
-for name, track in tracks.items():
-    print(f"Processing {name}...")
+def preprocess(track):
     track.detect_downbeats()
     track.estimate_tempo_from_downbeats()
+    print(f"Tempo : {track.tempo}")
+
+    track.calculate_beats_multifeature()
     track.calculate_rms_transition_cue_points()
-    track.detect_beats()
+    track.count_cue_points_in_all_beat_series()
 
     print("Tempo:", track.tempo)
-    print("Cue points:", track.cue_points)
-    print("Filtered Indices:", track.filtered_indices)
-    print("Downbeat Differences:", track.downbeat_differences)
-    print("\n\n")
+    print("Filtered Indices (RMS):", track.filtered_indices_rms)
+    print("Cue Points (RMS):", track.cue_points_rms)
+    print("Beat series : ", track.cue_point_counts)
+    print()
